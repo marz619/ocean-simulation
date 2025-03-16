@@ -7,11 +7,7 @@ from itertools import product
 from random import Random
 from typing import Any
 from typing import Callable
-from typing import DefaultDict
-from typing import Dict
 from typing import Iterable
-from typing import List
-from typing import Tuple
 
 
 class Occupant(Enum):
@@ -35,33 +31,24 @@ class Cell:
 EMPTY_CELL = Cell(Occupant.EMPTY)
 
 
-class DefaultNoSetDict(dict):
-    def __init__(self, default_factory: Callable[[], Any], *args, **kwargs):
-        # initialize the dict
+class OceanDict(dict):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # define our default_factory
-        self.default_factory = default_factory
 
     def get(self, key: Any, default: Any = None) -> Any:
-        super().get(key, default or self.default_factory())
+        super().get(key, default or EMPTY_CELL)
 
     def __getitem__(self, key: Any) -> Any:
         if key not in self:
-            return self.default_factory()
-
+            return EMPTY_CELL
         return super().__getitem__(key)
-
-
-def empty_cell_factory() -> Cell:
-    return EMPTY_CELL
 
 
 class Ocean:
     def __init__(self, width: int, height: int, _buffer: StringIO = None):
         self._width: int = width
         self._height: int = height
-        # self._ocean: DefaultDict[Cell] = defaultdict(lambda: EMPTY_CELL)
-        self._ocean: DefaultNoSetDict = DefaultNoSetDict(empty_cell_factory)
+        self._ocean: OceanDict = OceanDict()
         self._rand = Random()
         # text buffer
         self._buffer = _buffer or StringIO()
@@ -70,10 +57,10 @@ class Ocean:
     def __len__(self) -> int:
         return len(self._ocean)
 
-    def __setitem__(self, coords: Tuple[int, int], cell: Cell):
+    def __setitem__(self, coords: tuple[int, int], cell: Cell):
         self._ocean[self._coords(*coords)] = cell
 
-    def __getitem__(self, coords: Tuple[int, int]) -> Cell:
+    def __getitem__(self, coords: tuple[int, int]) -> Cell:
         return self._ocean[self._coords(*coords)]
 
     def __str__(self) -> str:
@@ -116,7 +103,7 @@ class Ocean:
     def height(self) -> int:
         return self._height
 
-    def _coords(self, x: int, y: int) -> Tuple[int, int]:
+    def _coords(self, x: int, y: int) -> tuple[int, int]:
         return x % self.width, y % self.height
 
     def _add(self, x: int, y: int, occupant: Occupant, feeding: int = 0) -> None:
@@ -197,7 +184,7 @@ class Ocean:
 
         return EMPTY_CELL
 
-    def _neighbours(self, x: int, y: int) -> List[Cell]:
+    def _neighbours(self, x: int, y: int) -> list[Cell]:
         return [
             self[(x + i, y + j)]
             for i in range(-1, 1 + 1)
@@ -206,5 +193,5 @@ class Ocean:
         ]
 
     @staticmethod
-    def counts(cells: Iterable[Cell]) -> Dict[Occupant, int]:
+    def counts(cells: Iterable[Cell]) -> dict[Occupant, int]:
         return Counter(c.occupant for c in cells)

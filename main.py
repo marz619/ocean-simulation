@@ -2,16 +2,13 @@
 
 import argparse
 import io
-import multiprocessing
+import multiprocessing as mp
 import os
 import random
 import sys
 import threading
 import time
 import traceback
-from typing import List
-from typing import NoReturn
-from typing import Tuple
 
 from ocean import Ocean
 
@@ -42,14 +39,13 @@ class SimText:
         return ocean
 
 
-# def simulate_ocean(ocean: Ocean, starve_time: int, frames: int, queue: multiprocessing.Queue, signal: threading.Event):
 def simulate_ocean(
     ocean: Ocean,
     starve_time: int,
     frames: int,
     kill_repeat: bool,
-    queue: multiprocessing.Queue,
-    sigInt: multiprocessing.Event,
+    queue: mp.Queue,
+    sigInt: mp.Event,
 ) -> None:
     """
     Simulate the ocean
@@ -135,26 +131,25 @@ def simulate_ocean(
         sigInt.clear()
 
 
-# def run_ocean(ocean: Ocean, starve_time: int, fps: int=24, frames: int=-1) -> Tuple[multiprocessing.Queue, threading.Event]:
 def run_ocean(
     ocean: Ocean,
-    sigInt: multiprocessing.Event,
+    sigInt: mp.Event,
     *,
     starve_time: int = 3,
     fps: int = 24,
     frames: int = -1,
     kill_repeat: bool = False,
-) -> Tuple[multiprocessing.Process, multiprocessing.Queue]:
+) -> tuple[mp.Process, mp.Queue]:
     """
     Runs the ocean in a separate process
     """
-    queue = multiprocessing.Queue(maxsize=int(fps * 1.5))
-    # queue = multiprocessing.Queue()
+    queue = mp.Queue(maxsize=int(fps * 1.5))
+    # queue = mp.Queue()
     # signal = threading.Event()
     # signal.set()
 
     # runner = threading.Thread(target=simulate_ocean, args=(ocean, starve_time, frames, queue, sigInt,))
-    runner = multiprocessing.Process(
+    runner = mp.Process(
         target=simulate_ocean,
         args=(
             ocean,
@@ -226,20 +221,7 @@ def args_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(sigInt: multiprocessing.Event) -> NoReturn:
-    # # parsed args as vars
-    # args = vars(args_parser().parse_args())
-    #
-    # # defaults args
-    # width, height, starve_time, fps, frames, kill_repeat = (
-    #     args["width"],
-    #     args["height"],
-    #     args["starve_time"],
-    #     args["fps"],
-    #     args["frames"],
-    #     args["kill_repeat"],
-    # )
-    #
+def main(sigInt: mp.Event) -> None:
     # parse our CLI arguments
     kwargs = vars(args_parser().parse_args())
 
@@ -257,8 +239,9 @@ def main(sigInt: multiprocessing.Event) -> NoReturn:
     frame = -1
 
     # sleep factor fudges the sleep duration to account for overhead
-    # sleep_factor = 1.0 + (2.0 / 30.0)  # 1.0666...
-    sleep_factor = 1.06775
+    sleep_factor = 1.0 + (2.0 / 30.0)
+    # sleep_factor = 1.06775
+    # sleep_factor = 1.0
 
     # sleep duration - fudged to account for overhead
     sleep = 1.0 / (fps**sleep_factor)
@@ -291,10 +274,10 @@ def main(sigInt: multiprocessing.Event) -> NoReturn:
                 "frame:",
                 frame,
                 "(",
-                width,
-                height,
-                starve_time,
-                fps,
+                f"x:{width}",
+                f"y:{height}",
+                f"s:{starve_time}",
+                f"f:{fps}",
                 ")",
                 "fps:",
                 f"{frame/elapsed:.1f}",
@@ -314,11 +297,12 @@ def main(sigInt: multiprocessing.Event) -> NoReturn:
 if __name__ == "__main__":
     interrupt = False
     # process signal
-    sigInt = multiprocessing.Event()
+    sigInt = mp.Event()
 
     try:
         # main(sigInt, *sys.argv[1:])
         main(sigInt)
+        print()
     except KeyboardInterrupt:
         interrupt = True
         sigInt.wait()  # wait for the signal to be cleared
