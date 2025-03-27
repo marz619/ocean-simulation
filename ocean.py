@@ -57,7 +57,7 @@ class Ocean:
     def __len__(self) -> int:
         return len(self._ocean)
 
-    def __setitem__(self, coords: tuple[int, int], cell: Cell):
+    def __setitem__(self, coords: tuple[int, int], cell: Cell) -> None:
         self._ocean[self._coords(*coords)] = cell
 
     def __getitem__(self, coords: tuple[int, int]) -> Cell:
@@ -73,14 +73,13 @@ class Ocean:
             self._buffer.write(" ")
             for x in range(self.width):
                 # fetch the occupant
-                occupant = self[(x, y)].occupant
-                if occupant == Occupant.SHARK:
-                    self._buffer.write("🦈")
-                elif occupant == Occupant.FISH:
-                    self._buffer.write("🐠")
-                else:
-                    # self._buffer.write('🌊')
-                    self._buffer.write("📘")
+                match self[(x, y)].occupant:
+                    case Occupant.SHARK:
+                        self._buffer.write("🦈")
+                    case Occupant.FISH:
+                        self._buffer.write("🐠")
+                    case _:
+                        self._buffer.write("📘")
             self._buffer.write("\n")
 
         self.__str = self._buffer.getvalue()
