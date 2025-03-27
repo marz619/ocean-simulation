@@ -24,14 +24,14 @@ class SimText:
         x, y, r, offset = 0, 0, random.Random(), 78887
         ocean = Ocean(width, height)
 
-        for xx in range(width):
+        for _ in range(width):
             x = (x + offset) % width
             if x & 8 == 0:
-                for yy in range(height):
+                for _ in range(height):
                     y = (y + offset) % height
                     if y & 8 == 0:
                         rand = r.random()
-                        if rand < 0.5:
+                        if rand < 0.6:
                             ocean.add_fish(x, y)
                         elif rand >= 0.9:
                             ocean.add_shark(x, y)
