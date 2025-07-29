@@ -70,11 +70,13 @@ def simulate_ocean(
     def kill_str() -> str:
         return f"{top_bot}{mid('killed')}{top_bot}\n"
 
-    def repeat_str() -> str:
-        return f"{top_bot}{mid('repeat')}{top_bot}\n"
+    def repeat_str(x: int) -> str:
+        msg = f"repeat (frame: {x})"
+        return f"{top_bot}{mid(msg)}{top_bot}\n"
 
     # hash set
-    seen = {hash(ocean)}
+    # seen = {hash(ocean)}
+    seen = {hash(ocean): [0]}
 
     # track if we're going to run a limited number of frames
     counter = 0
@@ -84,8 +86,8 @@ def simulate_ocean(
         simple generator that tells the loop to keep going or to halt
         """
         nonlocal counter
+        counter += 1
         if frames > 0:
-            counter += 1
             if counter == frames:
                 return
         yield True
@@ -110,10 +112,10 @@ def simulate_ocean(
                 break
             if kill_repeat:
                 if (h := hash(ocean)) in seen:
-                    queue.put((ocean, repeat_str()))
+                    queue.put((ocean, repeat_str(seen[h][0])))
                     break
                 else:
-                    seen.add(h)
+                    seen.setdefault(h, []).append(counter)
     except KeyboardInterrupt:
         queue.put((ocean, kill_str()))
     except:
