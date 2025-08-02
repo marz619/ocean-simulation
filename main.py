@@ -2,7 +2,7 @@
 
 import argparse
 import io
-import multiprocessing as mp
+import multiprocessing
 import os
 import random
 import sys
@@ -43,8 +43,8 @@ def simulate_ocean(
     starve_time: int,
     frames: int,
     kill_repeat: bool,
-    queue: mp.Queue,
-    sigInt: mp.Event,
+    queue: multiprocessing.Queue,
+    sigInt: multiprocessing.Event,
 ) -> None:
     """
     Simulate the ocean
@@ -134,23 +134,23 @@ def simulate_ocean(
 
 def run_ocean(
     ocean: Ocean,
-    sigInt: mp.Event,
+    sigInt: multiprocessing.Event,
     *,
     starve_time: int = 3,
     fps: int = 24,
     frames: int = -1,
     kill_repeat: bool = False,
-) -> tuple[mp.Process, mp.Queue]:
+) -> tuple[multiprocessing.Process, multiprocessing.Queue]:
     """
     Runs the ocean in a separate process
     """
-    queue = mp.Queue(maxsize=int(fps * 1.5))
-    # queue = mp.Queue()
+    queue = multiprocessing.Queue(maxsize=int(fps * 1.5))
+    # queue = multiprocessing.Queue()
     # signal = threading.Event()
     # signal.set()
 
     # runner = threading.Thread(target=simulate_ocean, args=(ocean, starve_time, frames, queue, sigInt,))
-    runner = mp.Process(
+    runner = multiprocessing.Process(
         target=simulate_ocean,
         args=(
             ocean,
@@ -218,11 +218,17 @@ def args_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Flag determines if we should kill the ocean on a repetition",
     )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Debug flag",
+    )
 
     return parser
 
 
-def main(sigInt: mp.Event) -> None:
+def main(sigInt: multiprocessing.Event) -> None:
     # parse our CLI arguments
     kwargs = vars(args_parser().parse_args())
 
@@ -298,7 +304,7 @@ def main(sigInt: mp.Event) -> None:
 if __name__ == "__main__":
     interrupt = False
     # process signal
-    sigInt = mp.Event()
+    sigInt = multiprocessing.Event()
 
     try:
         # main(sigInt, *sys.argv[1:])
