@@ -44,7 +44,7 @@ def simulate_ocean(
     frames: int,
     kill_repeat: bool,
     queue: multiprocessing.Queue,
-    sigInt: multiprocessing.Event,
+    sigint_event: multiprocessing.Event,
 ) -> None:
     """
     Simulate the ocean
@@ -106,7 +106,7 @@ def simulate_ocean(
             if ocean.is_dead:
                 queue.put((ocean, dead_str()))
                 break
-            if sigInt.is_set():
+            if sigint_event.is_set():
                 queue.put((ocean, kill_str()))
                 break
             if kill_repeat:
@@ -129,12 +129,12 @@ def simulate_ocean(
         queue.put((None, None))
         # signal to consumers that we are done
         queue.close()
-        sigInt.clear()
+        sigint_event.clear()
 
 
 def run_ocean(
     ocean: Ocean,
-    sigInt: multiprocessing.Event,
+    sigint_event: multiprocessing.Event,
     *,
     starve_time: int = 3,
     fps: int = 24,
@@ -149,7 +149,7 @@ def run_ocean(
     # signal = threading.Event()
     # signal.set()
 
-    # runner = threading.Thread(target=simulate_ocean, args=(ocean, starve_time, frames, queue, sigInt,))
+    # runner = threading.Thread(target=simulate_ocean, args=(ocean, starve_time, frames, queue, sigint_event,))
     runner = multiprocessing.Process(
         target=simulate_ocean,
         args=(
@@ -158,7 +158,7 @@ def run_ocean(
             frames,
             kill_repeat,
             queue,
-            sigInt,
+            sigint_event,
         ),
     )
     runner.daemon = True
@@ -228,11 +228,16 @@ def args_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(sigInt: multiprocessing.Event) -> None:
+def main(sigint_event: multiprocessing.Event) -> None:
     # parse our CLI arguments
     kwargs = vars(args_parser().parse_args())
 
+    # extract debug
+    debug = kwargs.pop("debug")
+    
+    # extract width/height used to initialize Ocean
     width, height = kwargs.pop("width"), kwargs.pop("height")
+    # get fps/starve_time
     fps, starve_time = kwargs["fps"], kwargs["starve_time"]
 
     # initialize a random ocean
@@ -240,7 +245,7 @@ def main(sigInt: multiprocessing.Event) -> None:
     SimText.paint(ocean)
 
     # start the ocean simulation thread
-    proc, queue = run_ocean(ocean, sigInt, **kwargs)
+    proc, queue = run_ocean(ocean, sigint_event, **kwargs)
 
     # frame count
     frame = -1
@@ -297,22 +302,22 @@ def main(sigInt: multiprocessing.Event) -> None:
             # sleep for a bit
             time.sleep(sleep)
         except KeyboardInterrupt:
-            sigInt.set()
+            sigint_event.set()
             raise
 
 
 if __name__ == "__main__":
     interrupt = False
     # process signal
-    sigInt = multiprocessing.Event()
+    sigint_event = multiprocessing.Event()
 
     try:
-        # main(sigInt, *sys.argv[1:])
-        main(sigInt)
+        # main(sigint_event, *sys.argv[1:])
+        main(sigint_event)
         print()
     except KeyboardInterrupt:
         interrupt = True
-        sigInt.wait()  # wait for the signal to be cleared
+        sigint_event.wait()  # wait for the signal to be cleared
         sys.stdout.flush()
         print()
         # raise
