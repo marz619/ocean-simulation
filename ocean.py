@@ -1,12 +1,10 @@
 from collections import Counter
-from collections import defaultdict
 from enum import Enum
 from enum import auto
 from io import StringIO
 from itertools import product
 from random import Random
 from typing import Any
-from typing import Callable
 from typing import Iterable
 
 
@@ -52,20 +50,22 @@ class Ocean:
         self._rand = Random()
         # text buffer
         self._buffer = _buffer or StringIO()
-        self.__str = None
+        self._str = None
+        self._hash = None
 
     def __len__(self) -> int:
         return len(self._ocean)
 
     def __setitem__(self, coords: tuple[int, int], cell: Cell) -> None:
         self._ocean[self._coords(*coords)] = cell
+        self._hash = None
 
     def __getitem__(self, coords: tuple[int, int]) -> Cell:
         return self._ocean[self._coords(*coords)]
 
     def __str__(self) -> str:
-        if self.__str:
-            return self.__str
+        if self._str:
+            return self._str
 
         self._buffer.seek(0)
 
@@ -82,11 +82,18 @@ class Ocean:
                         self._buffer.write("📘")
             self._buffer.write("\n")
 
-        self.__str = self._buffer.getvalue()
-        return self.__str
+        self._str = self._buffer.getvalue()
+        return self._str
 
-    def __hash__(self) -> str:
-        return hash(self.__str__())
+    def __hash__(self) -> int:
+        if not self._hash:
+            occupants = tuple(
+                self[(x, y)].occupant
+                for x in range(self.width)
+                for y in range(self.height)
+            )
+            self._hash = hash(occupants)
+        return self._hash
 
     def random(self) -> float:
         return self._rand.random()
@@ -121,11 +128,10 @@ class Ocean:
 
     @property
     def is_dead(self) -> bool:
-        # return len(self) == 0
-        return False
+        return len(self) == 0
 
     def shark_feeding(self, x: int, y: int) -> int:
-        pass
+        raise NotImplementedError
 
     def time_step(self, starve_time: int) -> "Ocean":
         # new_ocean = Ocean(self.width, self.height, self._buffer)  # share a buffer???

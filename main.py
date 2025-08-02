@@ -6,7 +6,6 @@ import multiprocessing as mp
 import os
 import random
 import sys
-import threading
 import time
 import traceback
 
@@ -282,7 +281,7 @@ def main(sigInt: mp.Event) -> None:
                 f"f:{fps}",
                 ")",
                 "fps:",
-                f"{frame/elapsed:.1f}",
+                f"{frame / elapsed:.1f}",
                 "[",
                 hash(ocean),
                 "]",

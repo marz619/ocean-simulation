@@ -9,3 +9,11 @@ dependencies = []
 [tool.isort]
 profile = "black"
 force_single_line = true
+
+[dependency-groups]
+dev = [
+    "ptpython>=3.0.30",
+    "pytest>=8.4.1",
+    "ruff>=0.12.7",
+    "ty>=0.0.1a16",
+]
