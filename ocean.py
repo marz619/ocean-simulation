@@ -36,7 +36,7 @@ class OceanDict(dict):
         super().__init__(*args, **kwargs)
 
     def get(self, key: Any, default: Any = None) -> Any:
-        super().get(key, default or EMPTY_CELL)
+        return super().get(key, default or EMPTY_CELL)
 
     def __getitem__(self, key: Any) -> Any:
         if key not in self:
