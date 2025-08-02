@@ -8,6 +8,7 @@ import random
 import sys
 import time
 import traceback
+from multiprocessing.synchronize import Event
 
 from ocean import Ocean
 
@@ -44,7 +45,7 @@ def simulate_ocean(
     frames: int,
     kill_repeat: bool,
     queue: multiprocessing.Queue,
-    sigint_event: multiprocessing.Event,
+    sigint_event: Event,
 ) -> None:
     """
     Simulate the ocean
@@ -134,7 +135,7 @@ def simulate_ocean(
 
 def run_ocean(
     ocean: Ocean,
-    sigint_event: multiprocessing.Event,
+    sigint_event: Event,
     *,
     starve_time: int = 3,
     fps: int = 24,
@@ -228,7 +229,7 @@ def args_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(sigint_event: multiprocessing.Event) -> None:
+def main(sigint_event: Event) -> None:
     # parse our CLI arguments
     kwargs = vars(args_parser().parse_args())
 
