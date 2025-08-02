@@ -29,21 +29,23 @@ class Cell:
 EMPTY_CELL = Cell(Occupant.EMPTY)
 
 
-class OceanDict(dict):
+class OceanDict(dict[tuple[int, int], Cell]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def get(self, key: Any, default: Any = None) -> Any:
-        return super().get(key, default or EMPTY_CELL)
+    # def get(self, key: tuple[int, int], default: Cell = EMPTY_CELL) -> Cell:
+    #    return super().get(key, default)
+    def get(self, key: tuple[int, int]) -> Cell:
+        return super().get(key, EMPTY_CELL)
 
-    def __getitem__(self, key: Any) -> Any:
+    def __getitem__(self, key: tuple[int, int]) -> Any:
         if key not in self:
             return EMPTY_CELL
         return super().__getitem__(key)
 
 
 class Ocean:
-    def __init__(self, width: int, height: int, _buffer: StringIO = None):
+    def __init__(self, width: int, height: int, _buffer: StringIO | None = None):
         self._width: int = width
         self._height: int = height
         self._ocean: OceanDict = OceanDict()
@@ -57,11 +59,11 @@ class Ocean:
         return len(self._ocean)
 
     def __setitem__(self, coords: tuple[int, int], cell: Cell) -> None:
-        self._ocean[self._coords(*coords)] = cell
+        self._ocean[self._wrap_coords(*coords)] = cell
         self._hash = None
 
     def __getitem__(self, coords: tuple[int, int]) -> Cell:
-        return self._ocean[self._coords(*coords)]
+        return self._ocean[self._wrap_coords(*coords)]
 
     def __str__(self) -> str:
         if self._str:
@@ -109,11 +111,11 @@ class Ocean:
     def height(self) -> int:
         return self._height
 
-    def _coords(self, x: int, y: int) -> tuple[int, int]:
+    def _wrap_coords(self, x: int, y: int) -> tuple[int, int]:
         return x % self.width, y % self.height
 
     def _add(self, x: int, y: int, occupant: Occupant, feeding: int = 0) -> None:
-        x, y = self._coords(x, y)
+        x, y = self._wrap_coords(x, y)
         if self._ocean[(x, y)] == EMPTY_CELL:
             self._ocean[(x, y)] = Cell(occupant, feeding)
 
@@ -131,7 +133,9 @@ class Ocean:
         return len(self) == 0
 
     def shark_feeding(self, x: int, y: int) -> int:
-        raise NotImplementedError
+        if (cell := self[(x, y)]).occupant == Occupant.SHARK:
+            return cell.feeding
+        return 0
 
     def time_step(self, starve_time: int) -> "Ocean":
         # new_ocean = Ocean(self.width, self.height, self._buffer)  # share a buffer???

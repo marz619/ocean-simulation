@@ -1,4 +1,3 @@
-
 from ocean import Ocean, Occupant
 
 
