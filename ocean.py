@@ -187,12 +187,13 @@ class Ocean:
         return EMPTY_CELL
 
     def _neighbours(self, x: int, y: int) -> list[Cell]:
-        return (
-            (x+i, y+j, self[(x + i, y + j)])
+        return [
+            # (x+i, y+j, self[(x + i, y + j)])
+            self[(x + i, y + j)]
             for i in range(-1, 1 + 1)
             for j in range(-1, 1 + 1)
             if (i, j) != (0, 0)
-        )
+        ]
 
     @staticmethod
     def counts(cells: Iterable[Cell]) -> Counter[Occupant, int]:
