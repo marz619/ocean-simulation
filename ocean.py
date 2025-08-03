@@ -33,8 +33,6 @@ class OceanDict(dict[tuple[int, int], Cell]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    # def get(self, key: tuple[int, int], default: Cell = EMPTY_CELL) -> Cell:
-    #    return super().get(key, default)
     def get(self, key: tuple[int, int]) -> Cell:
         return super().get(key, EMPTY_CELL)
 
@@ -116,7 +114,6 @@ class Ocean:
 
     def _add(self, x: int, y: int, occupant: Occupant, feeding: int = 0) -> None:
         x, y = self._wrap_coords(x, y)
-        if self._ocean[(x, y)] == EMPTY_CELL:
             self._ocean[(x, y)] = Cell(occupant, feeding)
 
     def add_fish(self, x: int, y: int) -> None:
@@ -124,9 +121,6 @@ class Ocean:
 
     def add_shark(self, x: int, y: int, feeding: int = 0) -> None:
         self._add(x, y, Occupant.SHARK, feeding)
-
-    def cell_contents(self, x: int, y: int) -> Occupant:
-        return self[(x, y)].occupant
 
     @property
     def is_dead(self) -> bool:
@@ -193,13 +187,13 @@ class Ocean:
         return EMPTY_CELL
 
     def _neighbours(self, x: int, y: int) -> list[Cell]:
-        return [
-            self[(x + i, y + j)]
+        return (
+            (x+i, y+j, self[(x + i, y + j)])
             for i in range(-1, 1 + 1)
             for j in range(-1, 1 + 1)
             if (i, j) != (0, 0)
-        ]
+        )
 
     @staticmethod
-    def counts(cells: Iterable[Cell]) -> dict[Occupant, int]:
+    def counts(cells: Iterable[Cell]) -> Counter[Occupant, int]:
         return Counter(c.occupant for c in cells)
