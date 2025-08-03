@@ -114,7 +114,7 @@ class Ocean:
 
     def _add(self, x: int, y: int, occupant: Occupant, feeding: int = 0) -> None:
         x, y = self._wrap_coords(x, y)
-            self._ocean[(x, y)] = Cell(occupant, feeding)
+        self._ocean[(x, y)] = Cell(occupant, feeding)
 
     def add_fish(self, x: int, y: int) -> None:
         self._add(x, y, Occupant.FISH)
