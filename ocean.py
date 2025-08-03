@@ -142,11 +142,12 @@ class Ocean:
         new_ocean = Ocean(self.width, self.height)
 
         for x, y in product(range(self.width), range(self.height)):
-            # # life finds a way
-            # cell = self._spontaneous_life_emergence(x, y, starve_time)
-            # if cell:
-            #     new_ocean._ocean[(x, y)] = cell
-            #     continue
+            # life finds a way
+            if (cell := self[(x, y)]) == EMPTY_CELL:
+                life = self._spontaneous_life_emergence(x, y, starve_time)
+                if life is not EMPTY_CELL:
+                    new_ocean._ocean[(x, y)] = life
+                    continue
 
             # apply rules
             cell = self._apply_rules(x, y, starve_time)
@@ -155,16 +156,14 @@ class Ocean:
 
         return new_ocean
 
-    # def _spontaneous_life_emergence(self, x: int, y: int, starve_time: int) -> Cell:
-    #     if self._ocean[(x, y)] is not EMPTY_CELL:
-    #         return EMPTY_CELL
-    #     # 2% change
-    #     if self.random() <= 0.02:
-    #         return EMPTY_CELL
-    #     # 20:80 SHARK:FISH
-    #     if self.randint() < 2:
-    #         return Cell(Occupant.SHARK, starve_time)
-    #     return Cell(Occupant.FISH)
+    def _spontaneous_life_emergence(self, x: int, y: int, starve_time: int) -> Cell:
+        # 2% chance of spotnaeous life
+        if self.random() <= 0.98:
+            return EMPTY_CELL
+        # 20:80 SHARK:FISH
+        if self.random() <= 0.2:
+            return Cell(Occupant.SHARK, starve_time)
+        return Cell(Occupant.FISH)
 
     def _apply_rules(self, x: int, y: int, starve_time: int) -> Cell:
         cell = self._ocean[(x, y)]  # current cell
