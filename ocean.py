@@ -130,6 +130,9 @@ class Ocean:
         if (cell := self[(x, y)]).occupant == Occupant.SHARK:
             return cell.feeding
         return 0
+    
+    def cell_contents(self, x: int, y: int) -> Occupant:
+        return self[(x, y)].occupant
 
     def time_step(self, starve_time: int) -> "Ocean":
         # new_ocean = Ocean(self.width, self.height, self._buffer)  # share a buffer???
