@@ -155,7 +155,7 @@ class Ocean:
 
     def _spontaneous_life_emergence(self, x: int, y: int, starve_time: int) -> Cell:
         # 2% chance of spotnaeous life
-        if self.random() <= 0.98:
+        if self.random() <= 0.999:
             return EMPTY_CELL
         # 20:80 SHARK:FISH
         if self.random() <= 0.2:
