@@ -173,8 +173,9 @@ class Ocean:
 
         if cell.occupant == Occupant.SHARK:
             feeding = starve_time if fishes else cell.feeding - 1
-            if feeding:
+            if feeding > 0:
                 return Cell(Occupant.SHARK, feeding)
+            return EMPTY_CELL
 
         if cell.occupant == Occupant.FISH:
             if sharks > 1:
