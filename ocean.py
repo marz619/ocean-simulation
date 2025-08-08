@@ -53,8 +53,11 @@ class Cell:
         return Cell(self.occupant, feeding)
 
 
+# useful constants
 EMPTY_CELL = Cell(Occupant.EMPTY)
 
+# type aliases
+Coordinates: TypeAlias = tuple[int, int]
 
 class OceanDict(dict[tuple[int, int], Cell]):
     def __init__(self, *args, **kwargs):
