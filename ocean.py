@@ -59,17 +59,15 @@ EMPTY_CELL = Cell(Occupant.EMPTY)
 # type aliases
 Coordinates: TypeAlias = tuple[int, int]
 
-class OceanDict(dict[tuple[int, int], Cell]):
+
+class OceanDict(dict[Coordinates, Cell]):
+    """ Partial dict implementation that holds the Ocean """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def get(self, key: tuple[int, int]) -> Cell:
-        return super().get(key, EMPTY_CELL)
-
-    def __getitem__(self, key: tuple[int, int]) -> Any:
-        if key not in self:
-            return EMPTY_CELL
-        return super().__getitem__(key)
+    def __missing__(self, key: Coordinates) -> Cell:
+        return EMPTY_CELL
 
 
 class Ocean:
