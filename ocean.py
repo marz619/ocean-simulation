@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from collections import Counter
+from dataclasses import dataclass, field
 from enum import Enum
 from enum import auto
 from io import StringIO
@@ -37,16 +40,17 @@ class Occupant(Enum):
                 assert_never(self)
 
 
+@dataclass(frozen=True, slots=True)
 class Cell:
-    def __init__(self, occupant: Occupant, feeding: int = 0):
-        self.occupant = occupant
-        self.feeding = feeding
+    occupant: Occupant
+    feeding: int = 0
 
-    def __str__(self) -> str:
-        return f"Cell[{str(self.occupant)}, {str(self.feeding)}]"
+    def __post_init__(self):
+        if self.feeding < 0:
+            raise ValueError("feeding cannot be negative")
 
-    def __repr__(self) -> str:
-        return f"Cell({str(self.occupant)}, feeding={repr(self.feeding)})"
+    def with_feeding(self, feeding: int) -> Cell:
+        return Cell(self.occupant, feeding)
 
 
 EMPTY_CELL = Cell(Occupant.EMPTY)
