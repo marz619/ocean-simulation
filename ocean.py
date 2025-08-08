@@ -3,6 +3,7 @@ from enum import Enum
 from enum import auto
 from io import StringIO
 from itertools import product
+from typing import assert_never
 from random import Random
 from typing import Any
 from typing import Iterable
@@ -12,6 +13,28 @@ class Occupant(Enum):
     EMPTY = auto()
     SHARK = auto()
     FISH = auto()
+
+    def __repr__(self) -> str:
+        match self:
+            case Occupant.EMPTY:
+                return " " 
+            case Occupant.FISH:
+                return "F"
+            case Occupant.SHARK:
+                return "S"
+            case _:
+                assert_never(self)
+
+    def __str__(self) -> str:
+        match self:
+            case Occupant.EMPTY:
+                return "📘" 
+            case Occupant.FISH:
+                return "🐠"
+            case Occupant.SHARK:
+                return "🦈"
+            case _:
+                assert_never(self)
 
 
 class Cell:
@@ -72,14 +95,7 @@ class Ocean:
         for y in range(self.height):
             self._buffer.write(" ")
             for x in range(self.width):
-                # fetch the occupant
-                match self[(x, y)].occupant:
-                    case Occupant.SHARK:
-                        self._buffer.write("🦈")
-                    case Occupant.FISH:
-                        self._buffer.write("🐠")
-                    case _:
-                        self._buffer.write("📘")
+                self._buffer.write(str(self[(x, y)].occupant))
             self._buffer.write("\n")
 
         self._str = self._buffer.getvalue()
